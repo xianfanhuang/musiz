@@ -5,7 +5,6 @@ import { EmotionColorMapper } from './components/EmotionColorMapper';
 import { BreathingVisualizer } from './components/BreathingVisualizer';
 import { GestureController } from './components/GestureController';
 
-// 扩展音乐数据结构
 const sampleTracks = [
   {
     id: 1,
@@ -36,6 +35,16 @@ const sampleTracks = [
     bpm: 140,
     emotion: 'energetic' as const,
     cover: "https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg?auto=compress&cs=tinysrgb&w=400"
+  },
+  {
+    id: 4,
+    title: "Sunny Day",
+    artist: "Golden Hour",
+    album: "Bright Moments",
+    duration: 210,
+    bpm: 110,
+    emotion: 'happy' as const,
+    cover: "https://images.pexels.com/photos/1366919/pexels-photo-1366919.jpeg?auto=compress&cs=tinysrgb&w=400"
   }
 ];
 
@@ -51,11 +60,11 @@ function App() {
   const [isVoiceControlEnabled, setIsVoiceControlEnabled] = useState(false);
   const [gestureEnabled, setGestureEnabled] = useState(true);
   const [visualIntensity, setVisualIntensity] = useState(0.7);
+  const [showSettings, setShowSettings] = useState(false);
   
   const progressInterval = useRef<NodeJS.Timeout>();
   const track = sampleTracks[currentTrack];
   
-  // 播放/暂停逻辑
   useEffect(() => {
     if (isPlaying) {
       progressInterval.current = setInterval(() => {
@@ -84,12 +93,10 @@ function App() {
     };
   }, [isPlaying, track.duration, isRepeated]);
 
-  // 音频分析数据处理
   const handleFrequencyData = useCallback((data: Uint8Array) => {
     setFrequencyData(new Uint8Array(data));
   }, []);
 
-  // 手势控制处理
   const handleGesture = useCallback((gesture: string) => {
     switch (gesture) {
       case 'swipeLeft':
@@ -107,10 +114,12 @@ function App() {
       case 'tap':
         togglePlay();
         break;
+      case 'doubleTap':
+        setIsLiked(!isLiked);
+        break;
     }
-  }, []);
+  }, [isLiked]);
 
-  // 语音控制
   useEffect(() => {
     if (!isVoiceControlEnabled || !('webkitSpeechRecognition' in window)) return;
 
@@ -167,82 +176,82 @@ function App() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gray-900">
-      {/* 音频分析器 */}
       <AudioAnalyzer isPlaying={isPlaying} onFrequencyData={handleFrequencyData} />
-      
-      {/* 手势控制器 */}
       <GestureController onGesture={handleGesture} isEnabled={gestureEnabled} />
-
-      {/* 情绪色彩映射背景 */}
       <EmotionColorMapper 
         emotion={track.emotion} 
         intensity={visualIntensity * (frequencyData ? Array.from(frequencyData).reduce((sum, val) => sum + val, 0) / (frequencyData.length * 255) : 0.5)} 
       />
-
-      {/* 呼吸感可视化器 */}
       <BreathingVisualizer 
         isPlaying={isPlaying} 
         frequencyData={frequencyData}
         bpm={track.bpm}
       />
 
-      {/* 设置面板 */}
+      {/* 设置按钮 */}
       <div className="absolute top-6 right-6 z-20">
-        <div className="backdrop-blur-xl bg-white/10 rounded-2xl p-4 border border-white/20">
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-              <Settings size={16} className="text-white/70" />
-              <span className="text-sm text-white/70">控制设置</span>
-            </div>
-            
-            <label className="flex items-center gap-2 text-sm text-white/80">
-              <input
-                type="checkbox"
-                checked={isVoiceControlEnabled}
-                onChange={(e) => setIsVoiceControlEnabled(e.target.checked)}
-                className="rounded"
-              />
-              语音控制
-            </label>
-            
-            <label className="flex items-center gap-2 text-sm text-white/80">
-              <input
-                type="checkbox"
-                checked={gestureEnabled}
-                onChange={(e) => setGestureEnabled(e.target.checked)}
-                className="rounded"
-              />
-              手势控制
-            </label>
-            
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-white/60">视觉强度</span>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.1"
-                value={visualIntensity}
-                onChange={(e) => setVisualIntensity(parseFloat(e.target.value))}
-                className="w-16 h-1 bg-white/20 rounded-full appearance-none cursor-pointer slider-small"
-              />
+        <button
+          onClick={() => setShowSettings(!showSettings)}
+          className="w-12 h-12 flex items-center justify-center rounded-full backdrop-blur-xl bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-all duration-300"
+        >
+          <Settings size={20} />
+        </button>
+        
+        {showSettings && (
+          <div className="absolute top-16 right-0 backdrop-blur-xl bg-white/10 rounded-2xl p-4 border border-white/20 min-w-48">
+            <div className="flex flex-col gap-3">
+              <div className="text-sm text-white/70 font-medium">控制设置</div>
+              
+              <label className="flex items-center gap-2 text-sm text-white/80">
+                <input
+                  type="checkbox"
+                  checked={isVoiceControlEnabled}
+                  onChange={(e) => setIsVoiceControlEnabled(e.target.checked)}
+                  className="rounded"
+                />
+                语音控制
+              </label>
+              
+              <label className="flex items-center gap-2 text-sm text-white/80">
+                <input
+                  type="checkbox"
+                  checked={gestureEnabled}
+                  onChange={(e) => setGestureEnabled(e.target.checked)}
+                  className="rounded"
+                />
+                手势控制
+              </label>
+              
+              <div className="flex flex-col gap-2">
+                <span className="text-xs text-white/60">视觉强度</span>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value={visualIntensity}
+                  onChange={(e) => setVisualIntensity(parseFloat(e.target.value))}
+                  className="w-full h-1 bg-white/20 rounded-full appearance-none cursor-pointer slider-small"
+                />
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* 主内容区域 */}
       <div className="relative z-10 flex items-center justify-center min-h-screen p-6">
         <div className="w-full max-w-md">
           
-          {/* 专辑封面 - 增强呼吸动画 */}
+          {/* 专辑封面 */}
           <div className="flex justify-center mb-8">
             <div className="relative">
               <div 
-                className="w-80 h-80 rounded-3xl overflow-hidden shadow-2xl animate-breathe-enhanced"
+                className="w-80 h-80 rounded-3xl overflow-hidden shadow-2xl"
                 style={{
                   filter: 'drop-shadow(0 25px 50px rgba(0,0,0,0.3))',
-                  transform: `scale(${1 + (frequencyData ? Array.from(frequencyData).reduce((sum, val) => sum + val, 0) / (frequencyData.length * 255) * 0.1 : 0)})`
+                  transform: `scale(${1 + (frequencyData ? Array.from(frequencyData).reduce((sum, val) => sum + val, 0) / (frequencyData.length * 255) * 0.1 : 0)})`,
+                  animation: isPlaying ? 'breathe-enhanced 6s ease-in-out infinite' : 'none'
                 }}
               >
                 <img 
@@ -250,23 +259,20 @@ function App() {
                   alt={track.album}
                   className="w-full h-full object-cover transition-all duration-300"
                 />
-                {/* 动态封面发光效果 */}
                 <div 
                   className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"
                   style={{
                     background: `linear-gradient(135deg, ${track.emotion === 'energetic' ? 'rgba(255,107,157,0.3)' : 'rgba(78,205,196,0.2)'} 0%, transparent 70%)`
                   }}
-                ></div>
+                />
               </div>
               
-              {/* 播放状态指示器 - 增强版 */}
               {isPlaying && (
                 <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-green-400 to-blue-400 rounded-full animate-pulse shadow-lg flex items-center justify-center">
-                  <div className="w-2 h-2 bg-white rounded-full animate-ping"></div>
+                  <div className="w-2 h-2 bg-white rounded-full animate-ping" />
                 </div>
               )}
 
-              {/* 语音控制指示器 */}
               {isVoiceControlEnabled && (
                 <div className="absolute -bottom-2 -left-2 w-8 h-8 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center shadow-lg">
                   <Mic size={16} className="text-white" />
@@ -275,9 +281,9 @@ function App() {
             </div>
           </div>
 
-          {/* 歌曲信息 - 增强版 */}
+          {/* 歌曲信息 */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2 tracking-wide animate-fade-in">
+            <h1 className="text-3xl font-bold text-white mb-2 tracking-wide">
               {track.title}
             </h1>
             <p className="text-lg text-white/70 font-medium mb-1">
@@ -290,16 +296,16 @@ function App() {
             </div>
           </div>
 
-          {/* 播放控制面板 - 增强毛玻璃效果 */}
+          {/* 播放控制面板 */}
           <div 
             className="backdrop-blur-2xl bg-white/10 rounded-3xl p-8 shadow-2xl border border-white/20 transition-all duration-500"
             style={{
               boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2)',
-              background: `linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)`
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)'
             }}
           >
             
-            {/* 进度条 - 增强版 */}
+            {/* 进度条 */}
             <div className="mb-6">
               <input
                 type="range"
@@ -308,6 +314,13 @@ function App() {
                 value={currentTime}
                 onChange={handleProgressChange}
                 className="w-full h-2 bg-white/20 rounded-full appearance-none cursor-pointer slider-enhanced"
+                style={{
+                  background: `linear-gradient(to right, 
+                    rgba(255,107,157,0.8) 0%, 
+                    rgba(78,205,196,0.8) ${(currentTime / track.duration) * 100}%, 
+                    rgba(255,255,255,0.2) ${(currentTime / track.duration) * 100}%, 
+                    rgba(255,255,255,0.2) 100%)`
+                }}
               />
               <div className="flex justify-between text-sm text-white/60 mt-2">
                 <span>{formatTime(currentTime)}</span>
@@ -315,7 +328,7 @@ function App() {
               </div>
             </div>
 
-            {/* 主控制按钮 - 增强版 */}
+            {/* 主控制按钮 */}
             <div className="flex items-center justify-center gap-6 mb-6">
               <button
                 onClick={prevTrack}
@@ -339,7 +352,7 @@ function App() {
               </button>
             </div>
 
-            {/* 辅助控制 - 增强版 */}
+            {/* 辅助控制 */}
             <div className="flex items-center justify-between">
               <button
                 onClick={() => setIsLiked(!isLiked)}
@@ -359,7 +372,6 @@ function App() {
                 <Shuffle size={16} />
               </button>
 
-              {/* 音量控制 - 增强版 */}
               <div className="flex items-center gap-2">
                 <Volume2 size={16} className="text-white/60" />
                 <input
@@ -385,7 +397,6 @@ function App() {
         </div>
       </div>
 
-      {/* 增强CSS样式 */}
       <style jsx>{`
         @keyframes breathe-enhanced {
           0%, 100% {
@@ -408,33 +419,6 @@ function App() {
             opacity: 0.95;
             filter: brightness(1.1) saturate(1.1);
           }
-        }
-
-        @keyframes fade-in {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .animate-breathe-enhanced {
-          animation: breathe-enhanced 8s ease-in-out infinite;
-        }
-
-        .animate-fade-in {
-          animation: fade-in 0.6s ease-out;
-        }
-
-        .slider-enhanced {
-          background: linear-gradient(to right, 
-            rgba(255,107,157,0.8) 0%, 
-            rgba(78,205,196,0.8) ${(currentTime / track.duration) * 100}%, 
-            rgba(255,255,255,0.2) ${(currentTime / track.duration) * 100}%, 
-            rgba(255,255,255,0.2) 100%);
         }
 
         .slider-enhanced::-webkit-slider-thumb {

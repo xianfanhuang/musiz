@@ -2,12 +2,12 @@ import React from 'react';
 
 interface EmotionColorMapperProps {
   emotion: 'happy' | 'sad' | 'energetic' | 'calm' | 'romantic';
-  intensity: number; // 0-1
+  intensity: number;
 }
 
 export const EmotionColorMapper: React.FC<EmotionColorMapperProps> = ({ emotion, intensity }) => {
   const getEmotionColors = (emotion: string, intensity: number) => {
-    const baseIntensity = Math.max(0.3, intensity); // 确保最小可见度
+    const baseIntensity = Math.max(0.3, intensity);
     
     const colorMaps = {
       happy: {

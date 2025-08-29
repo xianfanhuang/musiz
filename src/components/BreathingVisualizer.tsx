@@ -26,12 +26,11 @@ export const BreathingVisualizer: React.FC<BreathingVisualizerProps> = ({
   const [particles, setParticles] = useState<Particle[]>([]);
   const [time, setTime] = useState(0);
 
-  // 呼吸节律同步 - 精确到±20ms
   useEffect(() => {
     if (!isPlaying) return;
 
-    const breathCycle = (60 / bpm) * 4 * 1000; // 4拍一个完整呼吸周期
-    const phaseInterval = breathCycle / 100; // 100个相位点，提供平滑过渡
+    const breathCycle = (60 / bpm) * 4 * 1000;
+    const phaseInterval = breathCycle / 100;
 
     const interval = setInterval(() => {
       setBreathPhase(prev => (prev + 1) % 100);
@@ -41,11 +40,10 @@ export const BreathingVisualizer: React.FC<BreathingVisualizerProps> = ({
     return () => clearInterval(interval);
   }, [isPlaying, bpm]);
 
-  // 智能粒子系统
   const generateParticles = useMemo(() => {
     const colors = ['#FF6B9D', '#4ECDC4', '#A8E6CF', '#88D8B0', '#FFB347'];
     
-    return Array.from({ length: 40 }, (_, i) => ({
+    return Array.from({ length: 30 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
@@ -63,23 +61,18 @@ export const BreathingVisualizer: React.FC<BreathingVisualizerProps> = ({
     }
   }, [isPlaying, generateParticles]);
 
-  // 频谱数据驱动的视觉强度
   const getAudioIntensity = () => {
     if (!frequencyData || frequencyData.length === 0) return 0.5;
     
-    // 分析低频、中频、高频
     const lowFreq = Array.from(frequencyData.slice(0, 85)).reduce((sum, val) => sum + val, 0) / 85;
     const midFreq = Array.from(frequencyData.slice(85, 170)).reduce((sum, val) => sum + val, 0) / 85;
     const highFreq = Array.from(frequencyData.slice(170)).reduce((sum, val) => sum + val, 0) / (frequencyData.length - 170);
     
-    // 加权平均，低频权重更高
     const weightedIntensity = (lowFreq * 0.5 + midFreq * 0.3 + highFreq * 0.2) / 255;
     return Math.min(Math.max(weightedIntensity, 0.2), 1);
   };
 
   const audioIntensity = getAudioIntensity();
-  
-  // 呼吸动画计算
   const breathProgress = breathPhase / 100;
   const breathWave = Math.sin(breathProgress * Math.PI * 2);
   const breathScale = 1 + (breathWave * 0.15 * audioIntensity);
@@ -97,22 +90,6 @@ export const BreathingVisualizer: React.FC<BreathingVisualizerProps> = ({
             radial-gradient(circle at 30% 40%, rgba(255, 107, 157, ${0.4 * audioIntensity}) 0%, transparent 60%),
             radial-gradient(circle at 70% 60%, rgba(78, 205, 196, ${0.3 * audioIntensity}) 0%, transparent 60%),
             radial-gradient(circle at 50% 30%, rgba(168, 230, 207, ${0.2 * audioIntensity}) 0%, transparent 70%)
-          `
-        }}
-      />
-
-      {/* 次级呼吸层 */}
-      <div 
-        className="absolute inset-0 transition-all duration-300 ease-in-out"
-        style={{
-          transform: `scale(${1 + breathWave * 0.08 * audioIntensity}) rotate(${-breathProgress * 1.5}deg)`,
-          opacity: breathOpacity * 0.6,
-          background: `
-            conic-gradient(from ${breathProgress * 360}deg at 50% 50%, 
-              rgba(255, 107, 157, ${0.2 * audioIntensity}) 0deg,
-              rgba(78, 205, 196, ${0.15 * audioIntensity}) 120deg,
-              rgba(168, 230, 207, ${0.1 * audioIntensity}) 240deg,
-              rgba(255, 107, 157, ${0.2 * audioIntensity}) 360deg)
           `
         }}
       />
@@ -168,19 +145,6 @@ export const BreathingVisualizer: React.FC<BreathingVisualizerProps> = ({
           })}
         </div>
       )}
-
-      {/* 环形呼吸指示器 */}
-      <div 
-        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-        style={{
-          width: '600px',
-          height: '600px',
-          border: `2px solid rgba(255, 255, 255, ${0.1 * audioIntensity})`,
-          borderRadius: '50%',
-          transform: `translate(-50%, -50%) scale(${breathScale * 0.8}) rotate(${breathProgress * 360}deg)`,
-          opacity: breathOpacity * 0.5
-        }}
-      />
     </div>
   );
 };
