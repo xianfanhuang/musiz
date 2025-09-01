@@ -1,11 +1,11 @@
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/musiz/',  // 添加 GitHub Pages 子路径
-  plugins: [vue()],
-  build: {
-    outDir: 'dist'  // 保持默认输出目录，与工作流匹配
-  }
-})
+  plugins: [react()],
+  base: '/musiz/',
+  optimizeDeps: {
+    exclude: ['lucide-react'],
+  },
+});
