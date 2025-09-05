@@ -292,7 +292,7 @@ const AudioPlayer: React.FC = () => {
         </div>
       )}
 
-      {/* URL输入模态框 */}
+      {/* URL输入模态 */}
       {showUrlInput && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
