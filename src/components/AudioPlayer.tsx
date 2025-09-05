@@ -158,7 +158,6 @@ const AudioPlayer: React.FC = () => {
 
   return {/* 主播放器 - 总是显示 */}
 <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 mb-6 border border-white/20">
-  {/* 封面 / 歌曲信息 */}
   <div className="text-center mb-6">
     <div className="w-24 h-24 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center mx-auto mb-4">
       <Music className="w-12 h-12 text-white" />
