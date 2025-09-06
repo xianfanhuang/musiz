@@ -1,3 +1,5 @@
+import { BreathingVisualizer } from './BreathingVisualizer';
+
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   Play, 
