@@ -261,7 +261,17 @@ return (
         <span>添加链接</span>
       </button>
     </div>
-
+</div>
+｛/* 可视化组件 */｝
+<div className="relative w-full
+h-40 mt-6 overflow-hidden">
+‹BreathingVisualizer isPlaying={isPlaying}
+frequencyData={undefined} //
+后续接入频谱数据
+bpm={120}
+/>
+</ div>
+</div>
     {/* 播放列表 */}
     <PlaylistManager
       playlist={playlist}
