@@ -298,3 +298,7 @@ return (
     )}
   </div>
 );
+};
+
+export default AudioPlayer;
+
