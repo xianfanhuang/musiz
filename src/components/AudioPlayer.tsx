@@ -271,7 +271,6 @@ frequencyData={undefined} //
 bpm={120}
 />
 </ div>
-</div>
     {/* 播放列表 */}
     <PlaylistManager
       playlist={playlist}
