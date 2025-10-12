@@ -15,6 +15,17 @@
     --text-secondary: rgba(255, 255, 255, 0.7);
     --border-light: rgba(255, 255, 255, 0.1);
     --shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+    --ease-in-out-sine: cubic-bezier(0.445, 0.05, 0.55, 0.95);
+}
+
+@keyframes background-hue-rotate {
+  from {
+    filter: hue-rotate(0deg);
+  }
+  to {
+    filter: hue-rotate(360deg);
+  }
 }
 
 body {
@@ -26,6 +37,7 @@ body {
     width: 100vw;
     user-select: none;
     touch-action: none;
+    animation: background-hue-rotate 60s linear infinite;
 }
 
 #visualizer {
@@ -43,9 +55,10 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, rgba(10, 10, 20, 0.4) 0%, rgba(10, 10, 20, 0.2) 100%);
+    background: radial-gradient(ellipse at 50% 50%, rgba(10, 10, 20, 0.2) 0%, rgba(10, 10, 20, 0.8) 100%);
     z-index: 2;
     pointer-events: none;
+    transition: background 1s var(--ease-in-out-sine);
 }
 
 .container {
@@ -60,6 +73,21 @@ body {
     transition: opacity 0.5s ease;
 }
 
+@keyframes breathing {
+  0% {
+    transform: scale(1);
+    box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  50% {
+    transform: scale(1.01);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+}
+
 .player-card {
     background: var(--bg-card);
     backdrop-filter: blur(20px);
@@ -69,8 +97,9 @@ body {
     border: 1px solid var(--border-light);
     width: 100%;
     max-width: 500px;
-    transition: all 0.5s ease;
+    transition: all 0.8s var(--ease-in-out-sine);
     position: relative;
+    animation: breathing 8s var(--ease-in-out-sine) infinite;
 }
 
 .player-card.minimized {
@@ -215,7 +244,7 @@ body {
     border: 1px solid var(--border-light);
     color: white;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.4s var(--ease-out-expo);
     backdrop-filter: blur(10px);
     position: relative;
 }
@@ -301,7 +330,7 @@ body {
     border-radius: 20px;
     color: var(--text-secondary);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.4s var(--ease-out-expo);
     font-size: 14px;
     backdrop-filter: blur(10px);
 }
@@ -320,7 +349,7 @@ body {
     margin-top: 20px;
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.5s ease;
+    transition: max-height 0.8s var(--ease-in-out-sine);
     border-radius: 16px;
     background: rgba(0, 0, 0, 0.2);
 }
@@ -361,7 +390,7 @@ body {
     border-radius: 12px;
     margin-bottom: 6px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.4s var(--ease-out-expo);
 }
 
 .playlist-item:hover {

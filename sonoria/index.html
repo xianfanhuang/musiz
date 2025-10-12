@@ -43,7 +43,7 @@
             </div>
 
             <div class="progress-section">
-                <div class="progress-bar">
+                <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                     <div class="progress" id="progress"></div>
                 </div>
                 <div class="time-display">
@@ -91,36 +91,37 @@
             </div>
 
             <div class="more-menu" id="more-menu">
-                <div class="menu-item" id="shuffle-option">
+                <div class="menu-item" id="shuffle-option" role="menuitem" tabindex="0">
                     <i class="material-icons">shuffle</i>
                     <span id="shuffle-text">随机播放</span>
                 </div>
-                <div class="menu-item" id="loop-option">
+                <div class="menu-item" id="loop-option" role="menuitem" tabindex="0">
                     <i class="material-icons">loop</i>
                     <span id="loop-text">循环播放</span>
                 </div>
-                <div class="menu-item" id="clear-option">
+                <div class="menu-item" id="clear-option" role="menuitem" tabindex="0">
                     <i class="material-icons">clear_all</i>
                     <span>清空列表</span>
                 </div>
-                <div class="menu-item" id="performance-option">
+                <div class="menu-item" id="performance-option" role="menuitem" tabindex="0">
                     <i class="material-icons">speed</i>
                     <span id="performance-text">性能模式</span>
                 </div>
-                <div class="menu-item" id="settings-option">
+                <div class="menu-item" id="settings-option" role="menuitem" tabindex="0">
                     <i class="material-icons">settings</i>
                     <span>高级设置</span>
                 </div>
             </div>
 
-            <div class="upload-area" id="upload-area">
+            <div class="upload-area" id="upload-area" role="button" aria-label="Upload music files">
                 <i class="material-icons">library_music</i>
                 <div class="upload-text">拖放音乐文件或点击上传</div>
-                <div class="upload-progress" id="upload-progress"></div>
+                <div class="upload-progress" id="upload-progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
             </div>
 
             <div class="theme-selector">
-                <button class="theme-button active" data-mode="aurora" aria-label="极光主题">极光</button>
+                <button class="theme-button active" data-mode="serene" aria-label="宁静主题">宁静</button>
+                <button class="theme-button" data-mode="aurora" aria-label="极光主题">极光</button>
                 <button class="theme-button" data-mode="cosmic" aria-label="宇宙主题">宇宙</button>
                 <button class="theme-button" data-mode="neural" aria-label="神经网络主题">神经</button>
                 <button class="theme-button" data-mode="liquid" aria-label="液态主题">液态</button>

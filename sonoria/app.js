@@ -721,6 +721,51 @@ class PremiumAudioVisualizer {
         this.ctx2d.restore();
     }
 
+    renderSereneOrb(centerX, centerY, bass, mid, treble, energy, isBeat, intensity) {
+        const time = performance.now() * 0.0005;
+
+        // Orb size influenced by bass and overall energy
+        const orbRadius = 80 + (bass / 2.5) * intensity + (energy / 10) * intensity;
+
+        // Pulsing effect on beat
+        const pulse = isBeat ? 1.15 : 1;
+
+        // Soft ambient glow
+        const glowRadius = orbRadius * (2.5 + Math.sin(time) * 0.5);
+        const glowGradient = this.ctx2d.createRadialGradient(centerX, centerY, orbRadius, centerX, centerY, glowRadius);
+        glowGradient.addColorStop(0, `hsla(${this.hue}, ${this.saturation}%, ${this.brightness - 10}%, 0.2)`);
+        glowGradient.addColorStop(1, `hsla(${this.hue}, ${this.saturation}%, ${this.brightness - 20}%, 0)`);
+
+        this.ctx2d.fillStyle = glowGradient;
+        this.ctx2d.fillRect(0, 0, this.canvas2d.width, this.canvas2d.height);
+
+        // Central Orb
+        const orbGradient = this.ctx2d.createRadialGradient(centerX, centerY, 0, centerX, centerY, orbRadius * pulse);
+        orbGradient.addColorStop(0, `hsla(${this.hue}, ${this.saturation + 10}%, ${this.brightness + 15}%, 0.95)`);
+        orbGradient.addColorStop(0.7, `hsla(${(this.hue + 40) % 360}, ${this.saturation}%, ${this.brightness}%, 0.8)`);
+        orbGradient.addColorStop(1, `hsla(${(this.hue + 60) % 360}, ${this.saturation - 10}%, ${this.brightness - 10}%, 0.6)`);
+
+        this.ctx2d.fillStyle = orbGradient;
+        this.ctx2d.beginPath();
+        this.ctx2d.arc(centerX, centerY, orbRadius * pulse, 0, Math.PI * 2);
+        this.ctx2d.fill();
+
+        // Subtle orbiting particles driven by treble
+        const particleCount = 20 + Math.floor(treble / 15);
+        for (let i = 0; i < particleCount; i++) {
+            const angle = time * (1 + i * 0.1) + i * Math.PI * 0.1;
+            const distance = orbRadius + 20 + i * 2 + Math.sin(angle * 5) * 10;
+            const x = centerX + Math.cos(angle) * distance;
+            const y = centerY + Math.sin(angle) * distance;
+            const size = 1 + (treble / 100) * (i % 3 + 1) * intensity;
+
+            this.ctx2d.beginPath();
+            this.ctx2d.arc(x, y, size, 0, Math.PI * 2);
+            this.ctx2d.fillStyle = `hsla(${(this.hue + i * 20) % 360}, ${this.saturation}%, 85%, 0.7)`;
+            this.ctx2d.fill();
+        }
+    }
+
     animate() {
         this.animationId = requestAnimationFrame(this.animate.bind(this));
 
