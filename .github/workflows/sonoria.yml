@@ -1,7 +1,7 @@
 name: Sonoria Asset Setup
 on:
   push:
-    branches: [ version0.1 ]
+    branches: [ x ]
   workflow_dispatch:
 
 jobs:
