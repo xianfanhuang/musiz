@@ -1,0 +1,98 @@
+/* ---
+Sonoria Animations Stylesheet
+--- */
+
+/* --- Keyframe Animations --- */
+
+/* Used for the brand logo glow */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.4;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+}
+
+/* Used for the noise overlay to create a subtle grain effect */
+@keyframes noise {
+    0%, 100% { transform: translate(0, 0); }
+    10% { transform: translate(-5%, -10%); }
+    20% { transform: translate(-15%, 5%); }
+    30% { transform: translate(7%, -25%); }
+    40% { transform: translate(-5%, 25%); }
+    50% { transform: translate(-15%, 10%); }
+    60% { transform: translate(15%, 0%); }
+    70% { transform: translate(0%, 15%); }
+    80% { transform: translate(3%, 35%); }
+    90% { transform: translate(-10%, 10%); }
+}
+
+/* Fade in and out for hint messages */
+@keyframes fadeInOut {
+    0%, 100% { opacity: 0; }
+    10%, 90% { opacity: 1; }
+}
+
+/* --- Transition Classes & Effects --- */
+
+/* General fade-in for elements that appear */
+.fade-in {
+    opacity: 0;
+    animation: fadeIn 0.5s var(--t-timing-function) forwards;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+/* Card entrance animation */
+.bento-card {
+    transform: translateY(20px);
+    opacity: 0;
+    animation: cardEnter 0.6s var(--t-timing-function) forwards;
+}
+
+/* Staggered animation for cards */
+.player-card {
+    animation-delay: 0.2s;
+}
+
+.visual-controls-card {
+    animation-delay: 0.4s;
+}
+
+@keyframes cardEnter {
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* --- Player State Transitions --- */
+
+/* Play/Pause icon transition */
+.play-button .material-icons {
+    transition: transform 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+}
+
+.play-button.playing .material-icons {
+    transform: scale(0);
+}
+
+/* Example: A simple transition for the main container when something changes */
+.container {
+    transition: filter 0.5s ease;
+}
+
+.container.blurred {
+    filter: blur(5px);
+}
