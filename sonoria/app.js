@@ -82,7 +82,7 @@ class PremiumAudioVisualizer {
         // 可视化参数
         this.mode = 'aurora';
         this.isPlaying = false;
-        this.use3D = this.detectWebGLSupport();
+        this.use3D = false;
         this.performanceMode = this.shouldEnablePerformanceMode();
         this.hue = 0;
         this.saturation = 85;
