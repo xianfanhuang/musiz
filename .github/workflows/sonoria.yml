@@ -1,8 +1,8 @@
 name: Sonoria Asset Setup
 on:
   push:
-    branches: [ version0.1 ]  # 仅在 version0.1 分支触发
-  workflow_dispatch:  # 支持手动触发
+    branches: [ version0.1 ]
+  workflow_dispatch:
 
 jobs:
   setup-assets:
@@ -11,28 +11,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: version0.1  # 明确指定操作 version0.1 分支
+          ref: version0.1
 
       - name: Clear all directories except .github
         run: |
-          # 列出所有非.github目录并删除（排除.git目录避免破坏仓库）
-          find . -maxdepth 1 -type d ! -name ".github" ! -name ".git" -exec rm -rf {} +
-          # 删除当前目录下所有非目录文件（保留.git相关文件）
-          find . -maxdepth 1 -type f ! -name ".git*" -exec rm -f {} +
+          # 排除 . 和 ..，只删除非.github、非.git的一级目录
+          find . -maxdepth 1 -type d ! -name "." ! -name ".." ! -name ".github" ! -name ".git" -exec rm -rf {} +
+          # 排除 . 和 ..，只删除非.git开头的一级文件
+          find . -maxdepth 1 -type f ! -name "." ! -name ".." ! -name ".git*" -exec rm -f {} +
 
       - name: Create required directories and empty files
         run: |
-          # 创建空的 .nojekyll 文件
           : > .nojekyll
-          # 创建空的 index.html
           : > index.html
-          # 创建 styles 目录及下属空CSS文件
           mkdir -p styles && touch styles/main.css styles/components.css styles/animations.css
-          # 创建 js 目录及下属空JS文件
           mkdir -p js && touch js/visualizer.js js/audioProcessor.js js/ui.js js/main.js
 
       - name: Commit and push changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Setup Sonoria required directories and empty files"
-          branch: version0.1  # 确保推送到 version0.1 分支
+          branch: version0.1
