@@ -1,93 +1,38 @@
-```yaml
-name: Sonoria cleanup & placeholders
-
-# 仅在 version0.1 分支的 push 事件触发
+name: Sonoria Asset Setup
 on:
   push:
-    branches:
-      - version0.1
-
-permissions:
-  contents: write
+    branches: [ version0.1 ]  # 仅在 version0.1 分支触发
+  workflow_dispatch:  # 支持手动触发
 
 jobs:
-  replace-with-placeholders:
+  setup-assets:
     runs-on: ubuntu-latest
-    # 防止循环触发：如果本次提交信息包含 [sonoria] 则跳过（避免工作流自推再触发）
-    if: ${{ github.event.head_commit && !contains(github.event.head_commit.message, '[sonoria]') }}
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-          persist-credentials: true
+          ref: version0.1  # 明确指定操作 version0.1 分支
 
-      - name: Prepare shell (delete everything except .github, create placeholders)
+      - name: Clear all directories except .github
         run: |
-          set -euo pipefail
-          # Safety: show current branch and latest commit
-          echo "Running on branch: $GITHUB_REF"
-          echo "Latest commit message: ${GITHUB_EVENT_HEAD_COMMIT_MESSAGE:-}" || true
+          # 列出所有非.github目录并删除（排除.git目录避免破坏仓库）
+          find . -maxdepth 1 -type d ! -name ".github" ! -name ".git" -exec rm -rf {} +
+          # 删除当前目录下所有非目录文件（保留.git相关文件）
+          find . -maxdepth 1 -type f ! -name ".git*" -exec rm -f {} +
 
-          # Enable extended globbing and include dotfiles
-          shopt -s extglob dotglob
-
-          # List root content for logging
-          echo "Repository root content before cleanup:"
-          ls -la | sed -n '1,200p'
-
-          # Remove all files and directories except .github and .git
-          for entry in ./* ./.?*; do
-            # Skip . and ..
-            [[ "$entry" == "./." || "$entry" == "./.." ]] && continue
-            # Keep .github and .git
-            if [[ "$(basename "$entry")" == ".github" || "$(basename "$entry")" == ".git" ]]; then
-              echo "Keeping $entry"
-              continue
-            fi
-            echo "Removing $entry"
-            rm -rf -- "$entry"
-          done
-
-          # Recreate placeholder files and folders
-          mkdir -p styles js
-
-          # Root config marker
-          touch .nojekyll
-          echo "# Sonoria placeholder config" > sonoria.yml
-
-          # Create empty/placeholder files for the refactor (intentional minimal placeholders)
+      - name: Create required directories and empty files
+        run: |
+          # 创建空的 .nojekyll 文件
+          : > .nojekyll
+          # 创建空的 index.html
           : > index.html
-          : > styles/main.css
-          : > styles/components.css
-          : > styles/animations.css
-          : > js/visualizer.js
-          : > js/audioProcessor.js
-          : > js/ui.js
-          : > js/main.js
+          # 创建 styles 目录及下属空CSS文件
+          mkdir -p styles && touch styles/main.css styles/components.css styles/animations.css
+          # 创建 js 目录及下属空JS文件
+          mkdir -p js && touch js/visualizer.js js/audioProcessor.js js/ui.js js/main.js
 
-          # Show resulting tree
-          echo "Repository root content after placeholder creation:"
-          ls -la | sed -n '1,200p'
-          echo "styles/:"
-          ls -la styles || true
-          echo "js/:"
-          ls -la js || true
-
-      - name: Commit & push placeholders
-        run: |
-          set -euo pipefail
-          # Configure git user (action runner)
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git add -A
-          # If nothing to commit, exit gracefully
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-            exit 0
-          fi
-
-          git commit -m "chore(sonoria): replace repository contents with placeholders [sonoria]"
-          # Push back to the same branch (version0.1)
-          git push origin HEAD:refs/heads/version0.1
+      - name: Commit and push changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Setup Sonoria required directories and empty files"
+          branch: version0.1  # 确保推送到 version0.1 分支
