@@ -12,8 +12,8 @@
             --secondary: #f093fb;
             --accent: #4facfe;
             --bg-dark: #0a0a14;
-            --bg-card: rgba(255, 255, 255, 0.05);
-            --bg-card-hover: rgba(255, 255, 255, 0.08);
+            --bg-card: rgba(255, 255, 255, 0.1);
+            --bg-card-hover: rgba(255, 255, 255, 0.15);
             --text-primary: rgba(255, 255, 255, 0.95);
             --text-secondary: rgba(255, 255, 255, 0.6);
             --border-light: rgba(255, 255, 255, 0.08);
@@ -233,6 +233,14 @@
         .url-input-section {
             margin: 18px 0;
             position: relative;
+            max-height: 100px;
+            overflow: hidden;
+            transition: max-height 0.5s ease, margin 0.5s ease;
+        }
+
+        .url-input-section.hidden {
+            max-height: 0;
+            margin: 0;
         }
 
         .url-input {
@@ -885,6 +893,9 @@
                 <button class="icon-button" id="playlist-toggle" aria-label="播放列表">
                     <i class="material-icons-round">queue_music</i>
                 </button>
+                <button class="icon-button" id="url-toggle" aria-label="从URL加载">
+                    <i class="material-icons-round">link</i>
+                </button>
                 <button class="icon-button" id="upload-button" aria-label="上传音乐">
                     <i class="material-icons-round">library_music</i>
                 </button>
@@ -1519,6 +1530,8 @@
             const parseButton = document.getElementById('parse-button');
             const languageSwitcher = document.getElementById('language-switcher');
             const performanceToggle = document.getElementById('performance-toggle');
+            const urlToggle = document.getElementById('url-toggle');
+            const urlInputSection = document.querySelector('.url-input-section');
 
             let audioContext = null;
             let visualizer = null;
@@ -1561,6 +1574,9 @@
                     initAudioContext();
                     // 首次交互反馈
                     showNotification('音频功能已激活，开始您的音乐之旅吧');
+                }
+                if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume();
                 }
             }
 
@@ -1887,6 +1903,7 @@
             uploadArea.addEventListener('drop', (e) => {
                 e.preventDefault();
                 uploadArea.classList.remove('dragover');
+                markUserInteraction();
                 
                 const files = e.dataTransfer.files;
                 if (files && files.length > 0) {
@@ -1923,6 +1940,7 @@
             audioUpload.addEventListener('change', (e) => {
                 const files = e.target.files;
                 if (files && files.length > 0) {
+                    markUserInteraction();
                     let validFiles = 0;
                     
                     Array.from(files).forEach(file => {
@@ -2222,8 +2240,15 @@
                 onboardingModal.classList.remove('show');
             });
 
+            urlToggle.addEventListener('click', () => {
+                markUserInteraction();
+                urlInputSection.classList.toggle('hidden');
+                urlToggle.classList.toggle('active');
+            });
+
             // 初始化播放列表
             updatePlaylistDisplay();
+            urlInputSection.classList.add('hidden');
 
             // 初始通知
             setTimeout(() => {
