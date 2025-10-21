@@ -950,7 +950,8 @@
                 playlist: '播放列表',
                 clearPlaylist: '清空列表',
                 performanceMode: '性能模式',
-                qualityMode: '高质量模式'
+                qualityMode: '高质量模式',
+                playlistEmpty: '播放列表为空'
             },
             'en': {
                 title: 'Sonoria',
@@ -963,7 +964,8 @@
                 playlist: 'Playlist',
                 clearPlaylist: 'Clear list',
                 performanceMode: 'Performance',
-                qualityMode: 'Quality'
+                qualityMode: 'Quality',
+                playlistEmpty: 'Playlist is empty'
             }
         };
 
@@ -1527,6 +1529,7 @@
             let currentTrack = 0;
             let currentStream = null;
             let isUserInteracted = false;
+            let isDraggingProgress = false;
 
             // 初始化语言
             const userLang = navigator.language.includes('zh') ? 'zh-CN' : 'en';
@@ -1668,7 +1671,7 @@
             }
 
             function updateProgress() {
-                if (audioElement && !isNaN(audioElement.duration) && isFinite(audioElement.duration)) {
+                if (audioElement && !isNaN(audioElement.duration) && isFinite(audioElement.duration) && !isDraggingProgress) {
                     const progress = (audioElement.currentTime / audioElement.duration) * 100;
                     progressBar.style.width = `${progress}%`;
                 }
@@ -1741,7 +1744,7 @@
                 if (playlist.length === 0) {
                     playlistItems.innerHTML = `
                         <div style="text-align:center;padding:20px;color:var(--text-secondary);">
-                            ${i18n[document.documentElement.lang].playlist}为空
+                            ${i18n[document.documentElement.lang].playlistEmpty}
                         </div>
                     `;
                     return;
@@ -2127,26 +2130,56 @@
                 setTimeout(() => closePlaylist.classList.remove('ripple'), 600);
             });
 
-            progressBarContainer.addEventListener('click', (e) => {
-                markUserInteraction();
+            function seek(e) {
                 if (audioElement && !isNaN(audioElement.duration) && isFinite(audioElement.duration)) {
                     const rect = progressBarContainer.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const percentage = x / rect.width;
+                    const x = (e.clientX || e.touches[0].clientX) - rect.left;
+                    const percentage = Math.max(0, Math.min(1, x / rect.width));
                     audioElement.currentTime = percentage * audioElement.duration;
-                    updateProgress();
+                    progressBar.style.width = `${percentage * 100}%`;
                 }
+            }
+
+            progressBarContainer.addEventListener('mousedown', (e) => {
+                markUserInteraction();
+                isDraggingProgress = true;
+                seek(e);
+
+                function onMouseMove(e) {
+                    if (isDraggingProgress) {
+                        seek(e);
+                    }
+                }
+
+                function onMouseUp() {
+                    isDraggingProgress = false;
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                }
+
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
             });
 
             progressBarContainer.addEventListener('touchstart', (e) => {
                 markUserInteraction();
-                if (audioElement && !isNaN(audioElement.duration) && isFinite(audioElement.duration)) {
-                    const rect = progressBarContainer.getBoundingClientRect();
-                    const x = e.touches[0].clientX - rect.left;
-                    const percentage = x / rect.width;
-                    audioElement.currentTime = percentage * audioElement.duration;
-                    updateProgress();
+                isDraggingProgress = true;
+                seek(e);
+
+                function onTouchMove(e) {
+                    if (isDraggingProgress) {
+                        seek(e);
+                    }
                 }
+
+                function onTouchEnd() {
+                    isDraggingProgress = false;
+                    document.removeEventListener('touchmove', onTouchMove);
+                    document.removeEventListener('touchend', onTouchEnd);
+                }
+
+                document.addEventListener('touchmove', onTouchMove);
+                document.addEventListener('touchend', onTouchEnd);
                 e.preventDefault();
             }, { passive: false });
 
